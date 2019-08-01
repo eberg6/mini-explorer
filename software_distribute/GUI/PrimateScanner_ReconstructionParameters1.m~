@@ -1,0 +1,1505 @@
+function varargout = PrimateScanner_ReconstructionParameters1(varargin)
+% Last Modified by GUIDE v2.5 26-Apr-2019 18:30:26
+% Begin initialization code - DO NOT EDIT
+gui_Singleton = 1;
+gui_State = struct('gui_Name',       mfilename, ...
+                   'gui_Singleton',  gui_Singleton, ...
+                   'gui_OpeningFcn', @PrimateScanner_ReconstructionParameters1_OpeningFcn, ...
+                   'gui_OutputFcn',  @PrimateScanner_ReconstructionParameters1_OutputFcn, ...
+                   'gui_LayoutFcn',  [] , ...
+                   'gui_Callback',   []);
+if nargin && ischar(varargin{1})
+    gui_State.gui_Callback = str2func(varargin{1});
+end
+
+if nargout
+    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+else
+    gui_mainfcn(gui_State, varargin{:});
+end
+% End initialization code - DO NOT EDIT
+
+
+
+% --- Executes just before PrimateScanner_ReconstructionParameters1 is made visible.
+function PrimateScanner_ReconstructionParameters1_OpeningFcn(hObject, eventdata, handles, varargin)
+% This function has no plzwork args, see OutputFcn.
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% varargin   command line arguments to PrimateScanner_ReconstructionParameters1 (see VARARGIN)
+
+
+% Choose default command line plzwork for PrimateScanner_ReconstructionParameters1
+handles.plzwork = hObject;
+
+% Update handles structure
+guidata(hObject, handles);
+
+% UIWAIT makes PrimateScanner_ReconstructionParameters1 wait for user response (see UIRESUME)
+% uiwait(handles.figure1);
+
+
+
+% --- Outputs from this function are returned to the command line.
+function varargout = PrimateScanner_ReconstructionParameters1_OutputFcn(hObject, eventdata, handles) 
+
+varargout{1} = handles.plzwork;
+
+set(handles.choose_text, 'enable', 'off');
+set(handles.norm_text, 'enable', 'off');
+set(handles.ct_text, 'enable', 'off');
+set(handles.choose_text, 'String', '');
+set(handles.norm_text, 'String', '');
+set(handles.ct_text, 'String', '');
+reset = '0';
+handles.pathname_filename = reset;
+handles.pathname_choose = reset;
+handles.pathname_norm = reset;
+handles.pathname_ct = reset;
+
+set(handles.text_dynamicframes, 'enable', 'on');
+set(handles.frames_dynamic, 'enable', 'on');
+set(handles.frames_dynamic, 'String', '');
+set(handles.ScanLength, 'enable','off'); 
+set(handles.ScanLength, 'String', ''); 
+set(handles.TotalFrameLength, 'enable', 'on'); 
+set(handles.TotalFrameLength, 'String', ''); 
+set(handles.save_output, 'enable', 'on');
+set(handles.save_output, 'String', '');
+set(handles.save_output_txt, 'enable', 'on');
+set(handles.start2, 'enable', 'on');
+set(handles.outcome, 'enable', 'off');
+set(handles.sframe, 'enable', 'on');
+set(handles.eframe, 'enable', 'on');
+set(handles.sframe_txt, 'enable', 'on');
+set(handles.eframe_txt, 'enable', 'on');
+set(handles.start4, 'enable', 'on');
+set(handles.save_output, 'String', '');
+set(handles.outcome2, 'enable', 'off');
+set(handles.dose,'String','0'); 
+set(handles.injection_time_edit,'String',''); 
+
+set(handles.radiobutton19, 'Value', 1); 
+set(handles.radiobutton20, 'Value', 0); 
+
+
+function choose_Callback(hObject, eventdata, handles)
+% if get(handles.study, 'Value') == 2
+%     set(handles.start4, 'enable', 'off');
+% end
+
+[filename folder] = uigetfile({... % select file
+   '*.lm', '.lm Files';...
+   '*.*', 'All Files (*.*)';...   
+   '*.txt', 'Text Files(*.txt)'},...
+   'Select the Primate Scanner Image Dataset',...
+   '/run/media/meduser/data/Users/');
+
+
+pathname_choose = fullfile(folder, filename);
+set(handles.choose_text, 'String', filename);
+handles.pathname_choose = pathname_choose;
+
+if isequal(filename,0) == 1
+    pathname_choose = '0';
+    set(handles.choose_text, 'String', 'Error!')
+end
+
+handles.pathname_filename = filename; % .lm filename
+handles.pathstr1 = folder; % .lm folder filepath
+handles.pathname_choose = pathname_choose; % .lm filepath
+
+scan_time = get_scantime(handles.pathstr1,handles.pathname_filename); 
+
+f_dynamic_str = ['1,',num2str(scan_time)]; 
+set(handles.frames_dynamic,'String',f_dynamic_str); 
+set(handles.ScanLength, 'String',num2str(scan_time)); 
+set(handles.TotalFrameLength, 'String', num2str(scan_time)); 
+
+% guess for norm path
+norm_date = get_normdate(handles.pathstr1,handles.pathname_filename,'/run/media/meduser/backup1/normalization_data/'); 
+norm_path = ['/run/media/meduser/backup1/normalization_data/',norm_date];
+handles.pathname_norm = norm_path; 
+set(handles.norm_text,'String',norm_date); 
+
+% guess for CT image
+ct_folder = get_ctfolder(handles.pathstr1);
+set(handles.ct_text,'String',ct_folder); 
+ct_folder = [handles.pathstr1,ct_folder];
+%ct_folder = strjoin(ct_folder); 
+handles.pathname_ct = ct_folder;
+
+% get injected dose
+disp('Check injected dose is correct');
+dose1 = check_dose(handles.pathstr1,handles.pathname_filename);
+set(handles.dose,'String',num2str(dose1));
+
+% get injected time
+disp('Check injection time is correct:'); 
+injection_time = check_injtime(handles.pathstr1,handles.pathname_filename); 
+set(handles.injection_time_edit, 'String', injection_time); 
+
+
+guidata(hObject, handles);
+
+
+
+% --- Executes on button press in norm.
+function norm_Callback(hObject, eventdata, handles)
+
+pathname_norm = uigetdir('/run/media/meduser/backup1/normalization_data/', 'Select Normalization Folder'); 
+pathname_norm_text = erase(pathname_norm,'/run/media/meduser/backup1/normalization_data/'); 
+% /run/media/meduser/data/reconstruction/normalization
+set(handles.norm_text, 'String', pathname_norm_text);
+handles.pathname_norm = pathname_norm;
+
+if isequal(pathname_norm,0) == 1
+    pathname_norm = '0';
+    set(handles.norm_text, 'String', 'Error!')
+end
+
+handles.pathname_norm = pathname_norm; % norm filepath
+guidata(hObject, handles);
+
+
+
+% --- Executes on button press in ct.
+function ct_Callback(hObject, eventdata, handles)
+
+pathname_ct = uigetdir(handles.pathstr1, 'Select CT Image Folder');
+pathname_ct_text = erase(pathname_ct,handles.pathstr1); 
+set(handles.ct_text, 'String', pathname_ct_text);
+handles.pathname_ct = pathname_ct;
+
+if isequal(pathname_ct,0) == 1
+    pathname_ct = '0';
+    set(handles.ct_text, 'String', '0');
+end
+
+handles.pathname_ct = pathname_ct; % ct filepath
+guidata(hObject, handles);
+
+
+
+% --- Executes on button press in start2.
+function start2_Callback(hObject, eventdata, handles)
+
+%% values for .txt file
+
+frames_dynamic = get(handles.frames_dynamic, 'String');
+save_output = get(handles.save_output, 'String');
+
+%% error messages
+
+filename = 'Reconstruction_Parameters_111';
+save_as = fullfile('/run/media/meduser/data/process_lm_sino/', filename); 
+    
+valid_frames_dynamic = all(ismember(frames_dynamic, ', . 1234567890'));
+
+if isfield(handles, 'pathname_choose') == 0 ||...
+   strcmp(handles.pathname_choose, '0') == 1
+    errordlg('No .lm file selected', 'Error');
+    a = 3;
+elseif isfield(handles, 'pathname_norm') == 0 ||...
+    strcmp(handles.pathname_norm, '0') == 1
+    errordlg('No Normalization Folder Selected', 'Error');
+    a = 3; 
+elseif isempty(frames_dynamic) == 1
+    errordlg('Enter dynamic frames information','Error');
+    a = 3;
+elseif valid_frames_dynamic == 0
+    errordlg('Framing must only contain numeric values, spaces, and commas', 'Error');
+    a = 3;
+elseif isempty(save_output) == 1
+    errordlg('Enter Name for Histogramming Output Folder', 'Error');
+    a = 3;
+elseif isfield(handles, 'save_output')
+    mkdir(handles.pathstr1, save_output);
+    mkdir1 = fullfile(handles.pathstr1, save_output);
+end
+
+%% execute file
+
+% these override the default values
+fov = '3';
+static_dynamic = '1';
+write_lm = '1';
+write_sino = '0';
+dtcor = '0';
+rando = '0';
+atcor = '0';
+scatcor = '0';
+tof_on = '1'; 
+scout = '1'; 
+calib = 0; 
+ 
+
+lmfname1 = handles.pathname_filename; 
+lmfname = erase(lmfname1,'.lm'); 
+
+mkdir2 = [handles.pathstr1,'scout/']; 
+
+if (fov=='1')
+    numrad = 77;
+elseif (fov == '2')
+    numrad = 129;
+elseif (fov == '3')
+    numrad = 157;
+else
+    numrad = 129; 
+end
+
+strct = handles.pathname_ct; 
+indstr = find(strct=='/',1,'last'); 
+strct = strct(indstr+1:end)
+if strct == '0'
+	handles.pathname_ct = '0'; 
+end
+
+
+if (isfield(handles, 'pathname_choose') == 1) &&...
+   (strcmp(handles.pathname_choose, '0') == 0) &&...
+   (isfield(handles, 'pathname_norm') == 1) &&...
+   (strcmp(handles.pathname_norm, '0') == 0) &&...
+   (isfield(handles, 'pathname_ct') == 1) &&...
+   (get(handles.checkbox9,'Value') == 1) &&...
+   (strcmp(handles.pathname_ct, '0') == 0) &&...
+   (valid_frames_dynamic == 1) &&...
+   (isempty(frames_dynamic) == 0) &&...
+   (isempty(save_output) == 0)
+
+    a = 1;
+    
+
+
+elseif (isfield(handles, 'pathname_choose') == 1) &&...
+       (strcmp(handles.pathname_choose, '0') == 0) &&...
+       (isfield(handles, 'pathname_norm') == 1) &&...
+       (strcmp(handles.pathname_norm, '0') == 0) &&...
+       (valid_frames_dynamic == 1) &&...
+       (isempty(frames_dynamic) == 0) &&...
+       ((isfield(handles, 'pathname_ct') == 0) || (strcmp(handles.pathname_ct, '0') == 1) || (get(handles.checkbox9,'Value') == 0)) &&...
+       (isempty(save_output) == 0)
+
+    a = 2;
+    %handles.pathname_ct = '0';
+    
+end
+
+get(handles.checkbox9,'Value')
+get(handles.checkbox10,'Value')
+a
+
+ % check to see if this is a cylinder calibration scan 
+tf = contains(handles.pathstr1,'calibration_data'); 
+if tf > 0.5
+	disp('Processing calibration scan data'); 
+a = 1; 
+end
+
+
+switch a
+    case 1
+        run = 'Processing listmode data';
+        set(handles.start4, 'enable', 'on');
+
+		% first update dose if necessary
+		change_dose(handles.pathstr1,handles.pathname_filename,handles.dose); 
+        
+        %val_injtime = false; 
+        %while ~val_injtime
+        change_injtime(handles.pathstr1,handles.pathname_filename,handles.injection_time_edit); 
+        if ~val_injtime
+            disp('Invalid injection time format, do better (try again)'); 
+            return
+        end
+        %end
+        
+        
+        pause
+        
+        do_scout = 1; 
+        do_reg = 1; 
+		
+        
+        if tf
+            ctdir = [handles.pathstr1,'CT/'];
+            fname_ct = [ctdir,'attn_sino_129x156x111x111-float_sinorecon.raw'];           
+        else
+               
+            % check to see if registration has been done yet
+            fname_ct = [handles.pathname_ct,'/attn_sino_129x156x111x111-float_sinorecon.raw'];
+        end
+        
+        if exist(fname_ct,'file')
+            do_scout = 0; 
+            scout = '0';
+			
+            disp('Found attenuation file');
+			answer = questdlg('Redo CT image registration?','Found attenuation file','Yes','No','No');
+			switch answer
+				case 'Yes'
+					do_reg = 1;
+					disp('OK, redoing CT image registration...'); 
+					set(handles.checkbox9,'Value',0);
+                	set(handles.checkbox9,'enable','off');
+				case 'No'
+					do_reg = 0; 
+					set(handles.checkbox9,'Value',1); 
+                	set(handles.checkbox9,'enable','on');
+			end
+			guidata(hObject, handles);
+
+            %prompt = 'Redo CT image registration? Y/N: ';
+            %str = input(prompt,'s');
+            %do_reg = 0; 
+            %if isempty(str)
+             %   str = 'N';
+            %end
+            %if str == 'N' || str == 'n'
+                %set(handles.checkbox9,'Value',1); 
+                %set(handles.checkbox9,'enable','on');
+                %do_reg = 0; 
+            %end
+            %if str == 'Y' || str == 'y'
+             %   disp('Ok, redoing CT image registration'); 
+              %  do_reg = 1; 
+               % set(handles.checkbox9,'Value',0);
+                %set(handles.checkbox9,'enable','off');
+            %end
+        else
+            disp('No attenuation file found');
+            %disp('Starting CT image registration');
+            %set(handles.checkbox9,'Value',0);
+            %set(handles.checkbox9,'enable','off');
+			guidata(hObject, handles);
+        end
+		
+             
+            
+        
+            
+        if do_reg == 1
+           
+            
+            if tf
+				handles.pathname_ct = '/run/media/meduser/data/Users/calibration_data/CT_10cm_cylinder';                
+				mkdir(ctdir); 
+                ctdirA = [ctdir,'/A']; 
+                mkdir(ctdirA); 
+                Adir = [handles.pathname_ct,'/A'] ;
+                status = copyfile(Adir,ctdirA); 
+                pause(1)
+                if status<0.5
+                    disp('Could not copy CT image, please copy manually'); 
+                    pause
+                end
+                handles.pathname_ct = ctdir;
+            else
+                % check if dicoms are in 'A' folder
+                dcm_location = [handles.pathname_ct,'/A/Z50'];
+                if ~exist(dcm_location,'file')
+                    disp('Moving CT dicoms');
+                    dcm_name = [handles.pathname_ct,'/Z*'];
+                    Adir = [handles.pathname_ct,'/A'];
+                    mkdir(Adir);
+                    status = movefile(dcm_name,Adir);
+                    if status<0.5
+                        disp('Could not copy CT dicoms'); 
+                        pause
+                    end
+                end
+            
+            end
+                   
+			img_init = 0; 
+            petimgpath = make_lmacc_config(handles.pathname_norm,mkdir2,lmfname,numrad,0,img_init);
+            petimgpath = [petimgpath,'.os.20.it.1'];
+            
+            
+            fname_petscout = [petimgpath]; 
+            
+            if exist(fname_petscout,'file')>0.5
+                do_scout = 0; 
+            end
+           
+            
+            if do_scout == 1
+                
+                disp('**** PROCESSING SCOUT LISTMODE DATA... ****');
+            
+                mkdir(mkdir2); 
+            
+                static_dynamic = '1';
+                write_lm = '1';
+                write_sino = '0';
+                dtcor = '0';
+                rando = '1';
+                atcor = '0';
+                scatcor = '0';
+                tof_on = '1';
+                scout = '1';
+                
+                fid=fopen(save_as,'wt');
+                fprintf(fid,'%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n',...
+                    mkdir2,...
+                    handles.pathname_choose,...
+                    handles.pathname_norm,...
+                    handles.pathname_ct,...
+                    fov,...
+                    static_dynamic,...
+                    frames_dynamic,...
+                    write_lm,...
+                    write_sino,...
+                    dtcor,...
+                    rando,...
+                    atcor,...
+                    scatcor,...
+                    tof_on,...
+                    scout);
+                
+                fclose(fid);
+       
+                fname = '/run/media/meduser/data/process_lm_sino/process_lm_sino';
+                system(fname); 
+                      
+                make_combine_run_sh(mkdir2,0,1,0); 
+                fname = 'sh /run/media/meduser/data/reconstruction/lm_recon/run_combine.sh'; 
+                system(fname); 
+                make_lmreconext_run_sh(mkdir2,1,20,0);
+                fname = 'sh /run/media/meduser/data/reconstruction/lm_recon/run_lm_tof_ext.sh';
+                system(fname);
+                
+                
+            end
+            
+            disp('starting CT image registration'); 
+            pp = genpath('/run/media/meduser/data/normalization/'); 
+            addpath(pp); 
+                           
+            process_CTimg(handles.pathname_ct);
+
+			if tf %changed
+                register_PETCT2(handles.pathname_ct,petimgpath); 
+            else
+                register_PETCT(handles.pathname_ct,petimgpath); 
+            end
+
+            %register_PETCT(handles.pathname_ct,petimgpath); 
+            %register_PETCT2(handles.pathname_ct,petimgpath);
+            make_mumap(handles.pathname_ct); 
+            %set(handles.checkbox9,'Value',1); 
+            %set(handles.checkbox9,'enable','on');
+			if tf %changed
+               % guess for CT image
+                %ct_folder = get_ctfolder(handles.pathstr1)
+                ct_folder = 'CT'; 
+                set(handles.ct_text,'String',ct_folder); 
+                ct_folder = [handles.pathstr1,'CT'];
+                %ct_folder = strjoin(ct_folder); 
+                handles.pathname_ct = ct_folder;
+
+                
+                pause(0.5); 
+            end
+            guidata(hObject, handles);
+			rmpath(pp); 
+        end
+                   
+        
+        static_dynamic = '1';
+        write_lm = '1';
+        write_sino = '0';
+        dtcor = '1';
+        if (get(handles.radiobutton20,'Value')==1)
+            rando = '1'; 
+        end
+        if (get(handles.radiobutton19,'Value')==1)
+            rando = '2'; 
+        end
+        
+        atcor = '1';
+        scatcor = '0';
+        tof_on = '1';
+        scout = '0';
+        
+        fid=fopen(save_as,'wt');
+        fprintf(fid,'%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n',...
+            mkdir1,...
+            handles.pathname_choose,...
+            handles.pathname_norm,...
+            handles.pathname_ct,...
+            fov,...
+            static_dynamic,...
+            frames_dynamic,...
+            write_lm,...
+            write_sino,...
+            dtcor,...
+            rando,...
+            atcor,...
+            scatcor,...
+            tof_on,...
+            scout);
+        
+        fclose(fid);
+        
+        
+        
+        disp('**** PROCESSING LISTMODE DATA ALL FRAMES... ****');
+        
+        fname = '/run/media/meduser/data/process_lm_sino/process_lm_sino'; 
+        system(fname);
+        
+        pause(2);
+	
+		
+		set(handles.start4,'Value',1); 
+		start4_Callback(hObject, eventdata, handles);
+              
+        
+    case 2
+        run = 'Histogramming started WITHOUT CT or attenuation correction';
+        set(handles.start4, 'enable', 'on');
+        set(handles.checkbox9,'Value',0); 
+        %set(handles.checkbox9,'enable','off'); 
+        
+        static_dynamic = '1';
+        write_lm = '1';
+        write_sino = '0';
+        dtcor = '1';
+        if (get(handles.radiobutton20,'Value')==1)
+            rando = '1'; 
+        end
+        if (get(handles.radiobutton19,'Value')==1)
+            rando = '2'; 
+        end
+        atcor = '0';
+        scatcor = '0';
+        tof_on = '1';
+        scout = '0';
+        
+        fid=fopen(save_as,'wt');
+        fprintf(fid,'%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n',...
+            mkdir1,...
+            handles.pathname_choose,...
+            handles.pathname_norm,...
+            handles.pathname_ct,...
+            fov,...
+            static_dynamic,...
+            frames_dynamic,...
+            write_lm,...
+            write_sino,...
+            dtcor,...
+            rando,...
+            atcor,...
+            scatcor,...
+            tof_on,...
+            scout);
+        
+        fclose(fid);
+        
+        disp('**** PROCESSING LISTMODE DATA... ****');
+        
+        fname = '/run/media/meduser/data/process_lm_sino/process_lm_sino'; % fix this
+        system(fname);
+        
+        pause(1);
+
+		set(handles.start4,'Value',1); 
+		start4_Callback(hObject, eventdata, handles);
+        
+        
+    case 3
+        run = 'Not started, fix errors to begin histogramming';
+        set(handles.start4, 'enable', 'off');
+end
+run = 'Processing complete, ready for reconstruction'; 
+
+set(handles.outcome, 'String', run);
+
+
+
+
+
+% --- Executes when selected object is changed in reconstruction_selection.
+function reconstruction_selection_SelectionChangeFcn(hObject, eventdata, handles)
+
+
+
+
+% --- Executes when selected object is changed in frames_panel.
+function frames_panel_SelectionChangeFcn(hObject, eventdata, handles)
+
+switch get(handles.recon_all, 'Value')
+    case 1
+        set(handles.sframe, 'enable', 'off');
+        set(handles.eframe, 'enable', 'off');
+        set(handles.sframe_txt, 'enable', 'off');
+        set(handles.eframe_txt, 'enable', 'off');
+        set(handles.sframe, 'string', '0');
+        set(handles.eframe, 'string', '0');
+    case 0
+        set(handles.sframe, 'enable', 'on');
+        set(handles.eframe, 'enable', 'on');
+        set(handles.sframe_txt, 'enable', 'on');
+        set(handles.eframe_txt, 'enable', 'on');
+        set(handles.sframe, 'string', '0');
+        set(handles.eframe, 'string', '1');
+end
+
+
+
+% --- Executes on button press in start4.
+function start4_Callback(hObject, eventdata, handles)
+
+%% values for .txt file
+% recon_lm = get(handles.recon_lm, 'Value');
+% recon_lm_tof = get(handles.recon_lm_tof, 'Value');
+% recon_sino = get(handles.recon_sino, 'Value');
+% switch 1
+%     case recon_lm_tof
+%         recon = 1;
+%     case recon_lm
+%         recon = 2;
+%     case recon_sino
+%         recon = 3;
+% end
+% 
+% recon_all = get(handles.recon_all, 'Value');
+% recon_select = get(handles.recon_select, 'Value');
+% switch 1
+%     case recon_all
+%         frames = 1;
+%     case recon_select
+%         frames = 2;
+% end
+
+guidata(hObject, handles);
+
+sframe = get(handles.sframe, 'String');
+eframe = get(handles.eframe, 'String');
+% iter = get(handles.iter, 'String');
+save_output = get(handles.save_output, 'String');
+
+%% error messages
+valid_sframe = all(isstrprop(sframe, 'digit'));
+valid_eframe = all(isstrprop(eframe, 'digit'));
+% valid_iter = all(isstrprop(iter, 'digit'));
+
+if valid_sframe == 0 || valid_eframe == 0
+    errordlg('Start and End Frames must only contain numeric values (no spaces)', 'Brijesh Says!');
+    a = 7;
+elseif isempty(sframe) == 1
+    errordlg('Enter Start Frame','Brijesh Says!');
+    a = 7;
+elseif isempty(eframe) == 1
+    errordlg('Enter End Frame','Brijesh Says!');
+    a = 7;
+% elseif isempty(iter) == 1
+%     errordlg('Enter Number of Iterations','Brijesh Says!');
+%     a = 7;
+% elseif valid_iter == 0
+%     errordlg('Iterations must only contain numeric values (no spaces)', 'Brijesh Says!')
+%     a = 7;
+elseif str2num(sframe) > str2num(eframe)
+    errordlg('Start Frame must be smaller than End Frame', 'Brijesh Says!');
+    a = 7;
+% elseif str2num(iter) > 100
+%     errordlg('Must have 100 iterations or less', 'Brijesh Says!');
+%     a = 7;
+end
+
+
+%% execute file
+filename2 = 'Reconstruction_Parameters_2_simple';
+save_as2 = fullfile('/run/media/meduser/data/reconstruction/', filename2);
+
+
+% these override the default values
+fov = '3';
+static_dynamic = '1';
+write_lm = '1';
+write_sino = '0';
+dtcor = '0';
+rando = '0';
+atcor = '0';
+scatcor = '0';
+
+sss_tof = 0; 
+
+% check to see if registration has been done yet
+fname_ct = [handles.pathname_ct,'/attn_sino_129x156x111x111-float_sinorecon.raw']
+
+if exist(fname_ct,'file')<0.5
+    set(handles.checkbox9,'Value',0); 
+    %set(handles.checkbox9,'enable','off');
+    disp('No CT, no attenuation correction!'); 
+    %set(handles.checkbox9,'Value',1); 
+    %set(handles.checkbox9,'enable','on');
+
+    
+
+else
+    set(handles.checkbox9,'Value',1); 
+    set(handles.checkbox9,'enable','on');
+end
+
+sub = 0; 
+mult = 0; 
+sc = 0; 
+if (get(handles.checkbox10,'Value')==1)
+    sub=1; 
+end
+if (get(handles.checkbox9,'Value')==1)
+    mult=1; 
+end
+if (get(handles.scatter_checkbox,'Value')==1)
+    sc = 1; 
+end
+
+
+lmfname1 = handles.pathname_filename; 
+lmfname = erase(lmfname1,'.lm'); 
+
+if (fov=='1')
+    numrad=77;
+elseif (fov == '2')
+    numrad=129;
+elseif (fov == '3')
+    numrad = 157;
+else
+    numrad = 129; 
+end
+
+iter=2;
+subs=20;
+
+sf = str2num(sframe);
+ef = str2num(eframe); 
+
+
+if  ((valid_sframe == 1) &&...
+    (valid_eframe == 1) &&...
+    (str2num(eframe) >= str2num(sframe)) &&...
+    (isempty(sframe) == 0) &&...
+    (isempty(eframe) == 0))
+    
+    if get(handles.start2,'Value') == 1 && isfield(handles, 'pathstr1') == 1 && isfield(handles, 'save_output') == 1
+		handles.pathname_start4 = fullfile(handles.pathstr1, get(handles.save_output,'String'));
+		set(handles.outcome2,'String',handles.pathname_start4); 
+		pathname_start4 = handles.pathname_start4;
+	end
+    if isfield(handles, 'pathstr1') == 1 && isfield(handles, 'save_output') == 1 && get(handles.start2,'Value') == 0
+            hist_dir = fullfile(handles.pathstr1, save_output);
+            pathname_start4 = uigetdir(hist_dir, 'Select Data Folder');
+            set(handles.outcome2, 'String', pathname_start4);
+            handles.pathname_start4 = pathname_start4;
+    end
+    
+    if (isequal(pathname_start4,0) == 1)
+%        (strcmp(pathname_start4, 'C:\') == 1)
+        errordlg('Invalid directory chosen.', 'Brijesh Says!')
+        a = 7;
+    else
+        fid=fopen(save_as2,'wt');
+        fprintf(fid,'%s\n%.0f\n%s\n%s\n%.0f\n%s\n',...
+            pathname_start4,...
+            sframe,...
+            eframe,...
+            'lm_tof',...
+            iter,...
+            subs);
+        fclose(fid);
+        a = 8;
+    end
+
+end
+
+
+
+% 
+% if (get(handles.dynamic,'Value') == 1)
+%     disp('Making dynamic DICOMs'); 
+%     make_dynamic_dicom(pathname_start4,sf,ef); 
+% end
+% 
+% pause
+
+
+
+switch a
+    case 8
+        run = pathname_start4;
+        
+        
+        
+        % check to see if this is a cylinder calibration scan 
+        %handles.pathstr1
+        tf = contains(handles.pathstr1,'calibration_data'); 
+        
+        for k=sf:ef
+            f1 = ['**** STARTING IMAGE RECONSTRUCTION FRAME ',num2str(k),' ****']; 
+        
+            disp(f1);
+			
+			
+            
+            fid=fopen(save_as2,'wt');
+            fprintf(fid,'%s\n%.0f\n%s\n%s\n%.0f\n%s\n',...
+                pathname_start4,...
+                k); 
+            
+            fclose(fid);
+			
+            img_init = 0; 
+            petimgpath = make_lmacc_config(handles.pathname_norm,pathname_start4,lmfname,numrad,k,img_init); %%syd
+            petimgpath2 = [petimgpath,'.os.20.it.2'];
+            petimgpath22 = [petimgpath,'.oslmem.tof.temp.out.1'];
+           
+            
+            
+            if (sub > 0.5 || mult > 0.5)
+                
+                
+                
+                str_img = 'Y'; 
+                if exist(petimgpath2,'file')
+                    
+					answer = questdlg('Overwrite existing image?','PET image already exists!','Yes','No','No');
+					switch answer
+						case 'Yes'
+							str_img = 'Y';
+						case 'No'
+							str_img = 'N';
+					end
+					%disp('PET image file already exists!'); 
+                    %prompt = ['Overwrite existing image? [Y/N]: ']; 
+                    %str_img = input(prompt,'s');
+                    %if isempty(str_img)
+                     %   str_img = 'N';
+                    %end
+                    %if str_img == 'n'
+                     %   str_img = 'N';
+                    %end
+                    %if str_img == 'y'
+                     %   str_img = 'Y';
+                    %end
+                end
+						
+                if sc<0.5
+        
+                    make_combine_run_sh(pathname_start4,k,sub,mult);%%syd
+                    make_lmreconext_run_sh(pathname_start4,iter,subs,k);%%syd
+        
+                    if str_img == 'Y'
+                        disp('Starting reconstruction (no scatter correction)');
+                        fname = 'sh /run/media/meduser/data/reconstruction/lm_recon/run_combine.sh'; 
+                        system(fname); 
+        
+                        pause(1)
+                        fname = 'sh /run/media/meduser/data/reconstruction/lm_recon/run_lm_tof_ext.sh';
+                        system(fname);
+                    end
+        
+                else
+                    pp2 = genpath('/run/media/meduser/data/ScatterSS/');
+                    addpath(pp2);  
+                
+                    make_combine_run_sh(pathname_start4,k,sub,mult);
+                
+                    iter = 1; 
+                    make_lmreconext_run_sh(pathname_start4,iter,subs,k);
+                
+                
+                    if str_img == 'Y'
+                    
+                        if (~exist(petimgpath22,'file'))
+                            disp('Starting 1st iteration reconstruction with all corrections');
+                            fname = 'sh /run/media/meduser/data/reconstruction/lm_recon/run_combine.sh'; 
+                            system(fname); 
+            
+                            pause(2)
+                            fname = 'sh /run/media/meduser/data/reconstruction/lm_recon/run_lm_tof_ext.sh';
+                            system(fname);
+                        end
+                    
+                        if sss_tof > 0.5
+                            % estimate SSS scatter sino
+                            disp('Estimating SSS block sino'); 
+                            emi_sss_tof_lmdata_rs_xp_609ps_13x12_tof(pathname_start4,petimgpath22,handles.pathname_ct,k); 
+                    
+                            pause(0.5); 
+                    
+                            % scale SSS sino
+                            disp('Scaling SSS sino'); 
+                            scale_sss_sino_globalscale_tof(pathname_start4,handles.pathname_ct,k); 
+                    
+                            pause(0.5); 
+                    
+                            % make new sub lm file
+                            disp('Adding scatter mean to lm sub file'); 
+                            fname = '/run/media/meduser/data/process_lm_sino/scatter_lm_sino_tof';
+                            system(fname); 
+                            pause(0.5); 
+                        else
+                            % estimate SSS scatter sino
+                            disp('Estimating SSS block sino'); 
+                            emi_sss_tof_lmdata_rs_xp_609ps_13x12(pathname_start4,petimgpath22,handles.pathname_ct,k); 
+                    
+                            pause(0.5); 
+                    
+                            % scale SSS sino
+                            disp('Scaling SSS sino'); 
+                            scale_sss_sino_globalscale(pathname_start4,handles.pathname_ct,k); 
+                    
+                            pause(0.5); 
+                    
+                            % make new sub lm file
+                            disp('Adding scatter mean to lm sub file'); 
+                            fname = '/run/media/meduser/data/process_lm_sino/scatter_lm_sino_tof';
+                            system(fname); 
+                            pause(0.5); 
+                        end
+                    
+                    
+                    
+                    
+                        %str_sub = [pathname_start4,'/lm_reorder_f',num2str(k),'_sub.raw']; 
+                        %delete(str_sub); 
+                        %pause(0.5);
+                        %str_sub2 = [pathname_start4,'/lm_reorder_f',num2str(k),'_sub2.raw']; 
+                        %stat = movefile(str_sub2, str_sub); 
+                        %if (stat<0.5)
+                         %   disp('Could not rename sub file'); 
+                        %end
+                    
+                    
+                    
+                        img_init = 1; 
+                        petimgpath = make_lmacc_config(handles.pathname_norm,pathname_start4,lmfname,numrad,k,img_init);
+                        petimgpath3 = [petimgpath,'.os.20.it.1'];
+                    
+                        make_combine_run_sub2_sh(pathname_start4,k,sub,mult);
+                    
+                        iter = 1; 
+                        make_lmreconext_run_sh(pathname_start4,iter,subs,k);
+                    
+                        disp('Starting 2nd iteration reconstruction with all corrections');
+                        fname = 'sh /run/media/meduser/data/reconstruction/lm_recon/run_combine.sh'; 
+                        system(fname); 
+                    
+                        pause(2)
+                        fname = 'sh /run/media/meduser/data/reconstruction/lm_recon/run_lm_tof_ext.sh';
+                        system(fname);
+                    
+                        petimgpath4 = [petimgpath,'.os.20.it.2']; 
+                    
+                        stat = movefile(petimgpath3, petimgpath4); 
+                        if (stat<0.5)
+                            disp('Could not rename 2nd iter image'); 
+                        end                        
+                    
+                    end
+                                  
+                end
+        
+                pause(1);
+                
+                if tf
+                    disp('post-process calibration scan'); 
+                    
+                end
+                iter = 2; 
+				postprocess_img(pathname_start4,lmfname,petimgpath,handles.pathname_ct,tf,handles.pathname_norm,subs,iter,k);
+                   
+         		 
+
+
+				% delete raw files
+                remove_raws(pathname_start4,k);
+                
+                
+            else
+                disp('Check injected dose is correct');
+                check_dose(pathname_start4,lmfname);
+                
+                str_img = 'Y'; 
+                if exist(petimgpath,'file')
+                    disp('PET image file already exists!'); 
+                    prompt = ['Overwrite existing image? [Y/N]: ']; 
+                    str_img = input(prompt,'s');
+                    if isempty(str_img)
+                        str_img = 'N';
+                    end
+                    if str_img == 'n'
+                        str_img = 'N';
+                    end
+                    if str_img == 'y'
+                        str_img = 'Y';
+                    end
+                end
+                
+                make_lmrecon_run_sh(pathname_start4,iter,subs,k);
+                if str_img == 'Y'
+                    disp('Starting reconstruction without corrections (normalization only)');
+                 
+                    fname = 'sh /run/media/meduser/data/reconstruction/lm_recon/run_lm_tof.sh';
+                    system(fname);
+                end
+        
+                pause(1)
+                if tf
+                    disp('post-process calibration scan'); 
+                    
+                end
+                   
+                
+                
+                postprocess_img(pathname_start4,lmfname,petimgpath,handles.pathname_ct,tf,handles.pathname_norm,subs,iter,k); 
+
+				% delete raw files
+                remove_raws(pathname_start4,k);
+                
+            end
+        
+        end
+        
+       
+    case 7
+        run = 'Not Saved';
+end
+
+if (get(handles.dynamic,'Value') == 1)
+    disp('Making dynamic DICOMs'); 
+    make_dynamic_dicom(pathname_start4,sf,ef); 
+end
+
+set(handles.outcome2, 'String', run);
+set(handles.start2,'Value',0); 
+guidata(hObject, handles);
+
+disp(''); 
+disp('** FINISHED! **'); 
+
+
+
+function choose_text_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function choose_text_CreateFcn(hObject, eventdata, handles)
+ 
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function norm_text_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function norm_text_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function ct_text_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function ct_text_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+% --- Executes during object creation, after setting all properties.
+function recon_panel_CreateFcn(hObject, eventdata, handles)
+
+% Hint: get(hObject,'Value') returns toggle state of attenuation
+	
+	
+function frames_dynamic_Callback(hObject, eventdata, handles)
+
+scan_time = get_scantime(handles.pathstr1,handles.pathname_filename); 
+tot_length = calc_frame(handles.frames_dynamic);
+nframes = calc_nframes(handles.frames_dynamic)
+	
+set(handles.sframe,'String','0'); 
+set(handles.eframe,'String',nframes);
+set(handles.TotalFrameLength, 'String', num2str(tot_length)); 
+guidata(hObject, handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function frames_dynamic_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function save_output_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function save_output_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function outcome_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function outcome_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% 
+% function iter_Callback(hObject, eventdata, handles)
+% 
+% % --- Executes during object creation, after setting all properties.
+% function iter_CreateFcn(hObject, eventdata, handles)
+% 
+% if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+%     set(hObject,'BackgroundColor','white');
+% end
+% 
+
+% 
+% function subs_Callback(hObject, eventdata, handles)
+% 
+% % --- Executes during object creation, after setting all properties.
+% function subs_CreateFcn(hObject, eventdata, handles)
+% 
+% if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+%     set(hObject,'BackgroundColor','white');
+% end
+
+
+
+function sframe_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function sframe_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function eframe_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function eframe_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function outcome2_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function outcome2_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in checkbox9.
+function checkbox9_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox9 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox9
+
+
+% --- Executes on button press in checkbox10.
+function checkbox10_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox10
+
+
+% --- Executes on button press in radiobutton19.
+function singles_Callback(hObject, eventdata, handles)
+
+r_singles = get(handles.radiobutton19,'Value'); 
+if (r_singles==1)
+    set(handles.radiobutton20,'Value',0); 
+end
+if (r_singles==0)
+    set(handles.radiobutton20,'Value',1); 
+end
+% hObject    handle to radiobutton19 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton19
+
+
+% --- Executes on button press in radiobutton20.
+function delays_Callback(hObject, eventdata, handles)
+
+r_delays = get(handles.radiobutton20,'Value'); 
+if (r_delays==1)
+    set(handles.radiobutton19,'Value',0); 
+end
+if (r_delays==0)
+    set(handles.radiobutton19,'Value',1); 
+end
+% hObject    handle to radiobutton20 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton20
+
+
+% --- Executes on button press in dynamic.
+function dynamic_Callback(hObject, eventdata, handles)
+
+is_dynamic = get(handles.dynamic,'Value'); 
+if (is_dynamic == 1) 
+    scan_time = get_scantime(handles.pathstr1,handles.pathname_filename)
+	pause(0.1); 
+	inj_start = get_injtime(handles.pathstr1,handles.pathname_filename,scan_time);
+	
+    if inj_start < 10
+        inj_start = 0; 
+    end
+    scan_time_winj = scan_time - inj_start; 
+	
+    f_dyn = make_dynframes(scan_time_winj); 
+	pause(0.1); 
+%     set(handles.frames_dynamic,'String',''); 
+%     guidata(hObject, handles)
+    
+	
+	
+	if inj_start > 1
+        f_dyn = ['1,',num2str(inj_start),',',f_dyn]; 
+    end
+	set(handles.frames_dynamic,'String',f_dyn);
+	nframes = calc_nframes(handles.frames_dynamic)
+	tot_length = calc_frame(handles.frames_dynamic);
+	set(handles.sframe,'String','0'); 
+    set(handles.eframe,'String',nframes);  
+	set(handles.TotalFrameLength, 'String', num2str(tot_length)); 
+    guidata(hObject, handles); 
+    
+end
+if (is_dynamic == 0)
+    scan_time = get_scantime(handles.pathstr1,handles.pathname_filename)
+    f_dynamic_str = ['1,',num2str(scan_time)]; 
+    set(handles.frames_dynamic,'String',f_dynamic_str); 
+	set(handles.sframe, 'String','0');
+	set(handles.eframe, 'String','0');
+    guidata(hObject, handles)
+end
+    
+
+% hObject    handle to dynamic (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of dynamic
+
+
+
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+				
+				
+				
+
+
+% --- Executes on button press in scatter_checkbox.
+function scatter_checkbox_Callback(hObject, eventdata, handles)
+% hObject    handle to scatter_checkbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of scatter_checkbox
+
+
+
+function TotalFrameLength_Callback(hObject, eventdata, handles)
+% hObject    handle to TotalFrameLength (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of TotalFrameLength as text
+%        str2double(get(hObject,'String')) returns contents of TotalFrameLength as a double
+
+
+is_dynamic = get(handles.dynamic,'Value'); 
+if (is_dynamic == 1) 
+    scan_time = str2num(get(handles.TotalFrameLength,'String'));
+    tot_time = str2num(get(handles.ScanLength,'String')); 
+    pause(0.1); 
+    inj_start = get_injtime(handles.pathstr1,handles.pathname_filename,tot_time);
+    if inj_start < 10
+        inj_start = 0; 
+    end
+    scan_time_winj = scan_time - inj_start; 
+
+    f_dyn = make_dynframes(scan_time_winj); 
+    pause(0.1); 
+
+%     set(handles.frames_dynamic,'String',''); 
+%     guidata(hObject, handles)
+
+    if inj_start > 1
+        f_dyn = ['1,',num2str(inj_start),',',f_dyn]; 
+    end
+    set(handles.frames_dynamic,'String',f_dyn); 
+    tot_length = calc_frame(handles.frames_dynamic); 
+    set(handles.TotalFrameLength, 'String', num2str(tot_length));
+    guidata(hObject, handles);
+end
+if (is_dynamic == 0)
+    scan_time = str2num(get(handles.TotalFrameLength,'String'));
+    f_dynamic_str = ['1,',num2str(scan_time)]; 
+    set(handles.frames_dynamic,'String',f_dynamic_str); 
+    guidata(hObject, handles);
+end
+
+
+
+%f_dyn = make_dynframes(str2num(get(handles.TotalFrameLength,'String')));
+%set(handles.frames_dynamic,'String',f_dyn);
+guidata(hObject, handles);
+
+% --- Executes during object creation, after setting all properties.
+function TotalFrameLength_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to TotalFrameLength (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function ScanLength_Callback(hObject, eventdata, handles)
+% hObject    handle to ScanLength (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of ScanLength as text
+%        str2double(get(hObject,'String')) returns contents of ScanLength as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function ScanLength_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to ScanLength (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+	
+	
+	
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+function dose_Callback(hObject, eventdata, handles)
+% hObject    handle to dose (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of dose as text
+%        str2double(get(hObject,'String')) returns contents of dose as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function dose_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to dose (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over dose.
+function dose_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to dose (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% 
+% function edit48_Callback(hObject, eventdata, handles)
+% % hObject    handle to TotalFrameLength (see GCBO)
+% % eventdata  reserved - to be defined in a future version of MATLAB
+% % handles    structure with handles and user data (see GUIDATA)
+% 
+% % Hints: get(hObject,'String') returns contents of TotalFrameLength as text
+% %        str2double(get(hObject,'String')) returns contents of TotalFrameLength as a double
+% 
+% 
+% % --- Executes during object creation, after setting all properties.
+% function edit48_CreateFcn(hObject, eventdata, handles)
+% % hObject    handle to TotalFrameLength (see GCBO)
+% % eventdata  reserved - to be defined in a future version of MATLAB
+% % handles    empty - handles not created until after all CreateFcns called
+% 
+% % Hint: edit controls usually have a white background on Windows.
+% %       See ISPC and COMPUTER.
+% if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+%     set(hObject,'BackgroundColor','white');
+% end
+
+
+
+function injection_time_edit_Callback(hObject, eventdata, handles)
+% hObject    handle to injection_time_edit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of injection_time_edit as text
+%        str2double(get(hObject,'String')) returns contents of injection_time_edit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function injection_time_edit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to injection_time_edit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
