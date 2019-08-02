@@ -7,6 +7,8 @@ zika_flag = 0;
 
 % load CT image
 
+zika_flag = contains(CTpath, 'Zika')
+
 CTpath2=[CTpath,'/A/']; 
 
 lst = dir(CTpath2);
@@ -130,7 +132,7 @@ imgstore2(imgstore2>2500)=2500;
 
 
 
-struct img_info; 
+img_info = struct; 
 img_info.imsize = imsize; 
 img_info.kVp = kVp; 
 img_info.petpix = petpix; 
@@ -138,14 +140,29 @@ img_info.g_smooth = g_smooth;
 img_info.ct_dcminfo = ct_dcminfo; 
 
 
-zika_flag = contains(CTpath, 'Zika'); 
+ 
+
 
 if zika_flag
-    imgstore2_nobox = BoxRemove3Clicks(0.5, 5, imgstore2, img_info); 
-    imgstore22 = imgstore2; 
-    imgstore2 = imgstore2_nobox; 
+	box_remove_done = false;
+	while ~box_remove_done
+		close all
+    	imgstore2_nobox = BoxRemove1Click(0.5, 5, imgstore2); 
+    	%imgstore22 = imgstore2; 
+    	imgstore2 = imgstore2_nobox; 
+    	
+    	answer = questdlg('Do you want to remove more objects?','','Yes','No','No');
+		switch answer
+			case 'Yes'
+				box_remove_done = false; 
+				 				
+			case 'No'
+				box_remove_done = true; 
+				disp('OK, proceeding with image registration...'); 				
+    	
+    	end
+    end
 end
-
 
 
 

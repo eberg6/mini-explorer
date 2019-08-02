@@ -22,12 +22,12 @@ radius = 5;
 [rows, columns, slices] = size(grayImage);
 
 
-uiwait(msgbox(sprintf('Click a point on the box to remove')))
+
 
 figure
 imagesc(grayImage(:,:,floor(size(grayImage,3)/2)));
 
-
+uiwait(msgbox(sprintf('Click a point on the box to remove')));
 
 coordinates = [];
 
@@ -57,10 +57,10 @@ for k=1:n
     column = coordinates(k,2);
     
     % Correct if click misses actual pixel of ROI
-    rowLow = row - radius
-    rowHigh = row + radius
-    columnLow = column - radius
-    columnHigh = column + radius
+    rowLow = row - radius;
+    rowHigh = row + radius;
+    columnLow = column - radius;
+    columnHigh = column + radius;
     maxValue = max(max(grayImage(rowLow:rowHigh, columnLow:columnHigh, slice)));
     [newRow,newColumn] = find(grayImage(rowLow:rowHigh, columnLow:columnHigh, slice) == maxValue);
     maxRow = row + newRow - radius - 1;
