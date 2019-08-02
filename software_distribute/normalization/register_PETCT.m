@@ -4,6 +4,13 @@ function register_PETCT(CTpath,PETpath)
 petpix = 1.005; 
 g_smooth = 3.5; 
 
+zika_flag = 0; 
+
+zika_flag = contains(CTpath, 'Zika'); 
+if zika_flag
+	disp('Image registration with Zika box'); 
+end 
+
 numrad = 157; 
 numang = 156;
 numrings = 111;
@@ -174,34 +181,12 @@ theta = theta*(180/pi);
 if ~(theta > -20 && theta < 10)
 	theta = -3; 
 end
-%theta
 
 pause(1); 
 
 
-%figure(2)
-%title('click on pet bed near head'); 
-%imagesc(ctsag)
-%colormap(gray); 
-%[ctcol1,ctrow1]=ginput(1);
 
-%figure(2)
-%title('click on pet bed near legs'); 
-%imagesc(ctsag)
-%colormap(gray); 
-%[ctcol2,ctrow2]=ginput(1);
 
-%theta = atan((ctrow2-ctrow1)/(ctcol2-ctcol1)); 
-%theta = theta*(180/pi); 
-%% theta = -1*theta;
-ctimgnew = ctimg; 
-for n=1:size(ctimg,1) 
-	imtemp1 = squeeze(ctimg(n,:,:));
-	imtemp = imrotate(imtemp1,theta,'bilinear','crop');
-	ctimgnew(n,:,:) = permute(imtemp,[3,1,2]); 
-end
-ctimg = ctimgnew; 
-clear ctimgnew; 
 
 
 ctsag = (ctimg((round(size(ctimg,1)/2)-1):(round(size(ctimg,1)/2)+1),:,:)); 
@@ -211,59 +196,67 @@ ctsag = imgaussfilt(ctsag,3/2.355);
 
 
 
-pos_store = zeros((325-225),1);
-ccc = 1;  
-
-for axpos = 225:325
-%axpos1 = 175; 
-%axpos2 = 350; 
-
-axpos3 = axpos;  
-
-lp1 = ctsag(:,axpos3); 
 
 
-% find bed in rotated image
+if zika_flag
+	figure(3)
+	imagesc(ctsag)
+	title('Click on back of monkey'); 
+	colormap(gray);
+	[ctcol3,ctrow3] = ginput(1);
 
+else
 
-dmin = 100; 
-dtemp = 0; 
-pos = 1;
-for yind = 3:(length(lp1)-bed_npix_h-20)
-	%dtemp = sum(abs(lp3((yind-2):(yind+2))-ff)) + sum(abs(lp3((yind+bed_npix_d-2):(yind+bed_npix_d+2))-ff)) + sum(abs(lp3((yind+bed_npix_d+13):(yind+bed_npix_d+16))-(0.5.*ones(4,1)))); 
-	dtemp = sum(abs(lp1((yind-2):(yind+2))-ff)) + sum(abs(lp1((yind+bed_npix_d-2):(yind+bed_npix_d+2))-ff)) + sum(abs(lp1((yind+7):(yind+10))-0.092.*ones(4,1)));
-	if dtemp < dmin
-		dmin = dtemp;
-		pos = yind; 
+	ctimgnew = ctimg; 
+	for n=1:size(ctimg,1) 
+		imtemp1 = squeeze(ctimg(n,:,:));
+		imtemp = imrotate(imtemp1,theta,'bilinear','crop');
+		ctimgnew(n,:,:) = permute(imtemp,[3,1,2]); 
 	end
-end
-pos_store(ccc) = pos;
-ctrow3 = pos;
-ctcol3 = axpos3;
-ccc = ccc+1; 
+	ctimg = ctimgnew; 
+	clear ctimgnew; 
+
+
+	pos_store = zeros((325-225),1);
+	ccc = 1;  
+
+	for axpos = 225:325
+ 
+		axpos3 = axpos;  
+
+		lp1 = ctsag(:,axpos3); 
+
+		% find bed in rotated image
+		dmin = 100; 
+		dtemp = 0; 
+		pos = 1;
+		for yind = 3:(length(lp1)-bed_npix_h-20)
+			%dtemp = sum(abs(lp3((yind-2):(yind+2))-ff)) + sum(abs(lp3((yind+bed_npix_d-2):(yind+bed_npix_d+2))-ff)) + sum(abs(lp3((yind+bed_npix_d+13):(yind+bed_npix_d+16))-(0.5.*ones(4,1)))); 
+			dtemp = sum(abs(lp1((yind-2):(yind+2))-ff)) + sum(abs(lp1((yind+bed_npix_d-2):(yind+bed_npix_d+2))-ff)) + sum(abs(lp1((yind+7):(yind+10))-0.092.*ones(4,1)));
+			if dtemp < dmin
+				dmin = dtemp;
+				pos = yind; 
+			end
+		end
+		pos_store(ccc) = pos;
+		ctrow3 = pos;
+		ctcol3 = axpos3;
+		ccc = ccc+1; 
+
+	end
+
+	ctrow3 = round(mean(pos_store)); 
 
 end
+ 
+pause(1);
 
-ctrow3 = round(mean(pos_store)); 
 
-%ctsag = squeeze(ctimg(round(size(ctimg,1)/2),:,:));
-figure(3)
-imagesc(ctsag)
-colormap(gray);
-%[ctcol3,ctrow3] = ginput(1); 
-pause(3);
-
-%ctimg2 = zeros(size(ctimg)); 
 
 % remove GE petct bed
 vv2 = round(ctrow3) - 7;
 ctimg(:,1:vv2,:) = 0;  
 ctimg2 = ctimg; 
-
-%figure
-%imagesc(ctimg2(:,:,round(size(ctimg2,3)/2)))
-%colormap(gray)
-%axis image
 
 
 
@@ -290,8 +283,6 @@ end
 %imagesc(ctimg2(:,:,round(size(ctimg2,3)/2)-25))
 %colormap(gray)
 %axis image
-
-
 %pause
 
 vertct1 = round(ctrow3) + bed_npix_h - 2; 
