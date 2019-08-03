@@ -147,7 +147,7 @@ if zika_flag
 	box_remove_done = false;
 	while ~box_remove_done
 		close all
-    	imgstore2_nobox = BoxRemove1Click(0.5, 5, imgstore2); 
+    	imgstore2_nobox = BoxRemove1Click(0.5, 8, imgstore2); 
     	%imgstore22 = imgstore2; 
     	imgstore2 = imgstore2_nobox; 
     	

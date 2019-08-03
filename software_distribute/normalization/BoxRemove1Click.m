@@ -32,15 +32,19 @@ uiwait(msgbox(sprintf('Click a point on the box to remove')));
 coordinates = [];
 
 % Select box and circles
-hold on
-for i = 1:1
-  w = waitforbuttonpress;
-    points = get(gca,'CurrentPoint');
-     x = abs(round(points(1,2)));
-     y = abs(round(points(1,1)));
-     coordinates(i,:) = [x, y];
-end
-hold off
+%hold on
+%for i = 1:1
+%  w = waitforbuttonpress;
+%    points = get(gca,'CurrentPoint');
+%     x = abs(round(points(1,2)));
+%     y = abs(round(points(1,1)));
+%     coordinates(i,:) = [x, y];
+%end
+%hold off
+
+ 
+[x,y] = ginput(1); 
+coordinates(1,:) = [round(y),round(x)];
 
 %runningSelectionMsgbox = msgbox(sprintf('Program is running, please wait...'), 'Running', 'replace');
 disp('Program is running, please wait...'); 

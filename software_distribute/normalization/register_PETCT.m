@@ -201,9 +201,12 @@ ctsag = imgaussfilt(ctsag,3/2.355);
 if zika_flag
 	figure(3)
 	imagesc(ctsag)
-	title('Click on back of monkey'); 
+	title('Click on GE PET/CT bed'); 
 	colormap(gray);
 	[ctcol3,ctrow3] = ginput(1);
+	ctrow3
+	ctrow3 = ctrow3 + 35;
+	 
 
 else
 
