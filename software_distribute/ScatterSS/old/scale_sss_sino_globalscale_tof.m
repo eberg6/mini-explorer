@@ -1,4 +1,4 @@
-function scale_sss_sino(fdir,ct_path,frame)
+function scale_sss_sino_globalscale_tof(fdir,ct_path,frame)
 
 
 
