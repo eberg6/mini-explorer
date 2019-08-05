@@ -7,7 +7,7 @@ zika_flag = 0;
 
 % load CT image
 
-zika_flag = contains(CTpath, 'Zika')
+zika_flag = contains(CTpath, 'Zika');
 
 CTpath2=[CTpath,'/A/']; 
 
@@ -20,10 +20,10 @@ img1=dicomread(info);
 
 ctfov = info.ReconstructionDiameter; ctfov = double(ctfov); 
 numpix = info.Width; numpix=double(numpix); 
-pixelsize = ctfov/numpix; pixelsize=double(pixelsize)
+pixelsize = ctfov/numpix; pixelsize=double(pixelsize);
 %pixelsize = 0.625; 
-slicethick = info.SliceThickness; slicethick=double(slicethick)
-kVp = info.KVP; kVp = double(kVp)
+slicethick = info.SliceThickness; slicethick=double(slicethick);
+kVp = info.KVP; kVp = double(kVp);
 
 imgstore = zeros(numpix,numpix,num_slices);
 
@@ -71,7 +71,7 @@ axis image
 
 disp('Check image, press any key to continue'); 
 pause
-
+disp('ok, continue'); 
 
 % new pre-process
 %xend = pixelsize*size(imgstore,1);
@@ -112,7 +112,7 @@ zz = zz(1:end-1);
 [Xq,Yq,Zq]=meshgrid(0:petpix:xend,0:petpix:yend,0:petpix:zend);
 
 imgstore2 = interp3(X,Y,Z,imgstore,Xq,Yq,Zq,'linear'); 
-imsize = size(imgstore2)
+imsize = size(imgstore2);
 
 disp('finished interpolation'); 
 
@@ -163,7 +163,7 @@ if zika_flag
     	end
     end
 end
-
+close all
 
 
 
