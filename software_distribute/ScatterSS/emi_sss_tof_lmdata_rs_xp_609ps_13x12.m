@@ -51,14 +51,6 @@ attn_mask = reshape(attn_mask, img_size);
 
 
 
-%max(emis(:))  % 0.7410
-%min(emis(:))  % 0
-%max(attn_mask(:))  % 1
-%min(attn_mask(:))  % 0
-
-
-%kVp = 120; 
-
 b = 4.71e-3; 
 a = 5.1e-6; 
 
@@ -115,23 +107,7 @@ emis2 = interp3(emis, X, Y, Z);
 
 attn2 = interp3(attn, X, Y, Z);
 
-
-%max(emis2(:))  % 4-fold 4.02mm voxel: 0.2834   2-fold 2.01mm voxel: 0.3950   %  0.7410
-%min(emis2(:))  % 0
-%max(attn2(:))  % 0.0096
-%min(attn2(:))  % 0
-
 rmpath(p);
-
-%filename = strcat('./interp3_emis_', num2str(numvoxel_2), 'x', num2str(numvoxel_2), 's', num2str(numslice_2), '_monkey46166_float.raw');
-%fwrite(fopen(filename, 'wb'), emis2, 'single');
-
-%filename = strcat('./interp3_attn_', num2str(numvoxel_2), 'x', num2str(numvoxel_2), 's', num2str(numslice_2), '_monkey46166_float.raw');
-%fwrite(fopen(filename, 'wb'), attn2, 'single');
-
-%fclose('all');
-
-
 
 
 
@@ -142,11 +118,6 @@ highenergy = 650;   %   660    %
 energy_info = 0.13;   %  0.15  % 
 
 
-
-% % function S = compute_scatter(emis_image, attn_image, sss_image_size, sss_voxel_size, energy_info)
-% S_nonTOF = compute_scatter_OLD_bxp(scannerbxp, emis, attn, img_size, voxelsize, [lowenergy highenergy energy_info]);
-
-%tic
 S_nonTOF2_test = compute_scatter_OLD_bxp(scannerbxp, emis2, attn2, img_size_2, voxelsize_2, [lowenergy highenergy energy_info]);
 
 
@@ -157,9 +128,7 @@ fwrite(fid22,S_nonTOF2_test,'double');
 fclose(fid22); 
 
 
-
-%toc
-pause(1); 
+pause(0.5); 
 
 
 
