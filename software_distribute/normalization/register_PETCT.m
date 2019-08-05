@@ -21,7 +21,7 @@ num_slices = 445;
 image_size = [num_voxels num_voxels num_slices];
 voxel_size = [1.005, 1.005, 1.005];
 
-log_pet = true 
+log_pet = true;
 
 
 %%% Load and prep the pet and ct images
@@ -204,7 +204,7 @@ if zika_flag
 	title('Click on GE PET/CT bed'); 
 	colormap(gray);
 	[ctcol3,ctrow3] = ginput(1);
-	ctrow3
+	
 	ctrow3 = ctrow3 + 35;
 	 
 
