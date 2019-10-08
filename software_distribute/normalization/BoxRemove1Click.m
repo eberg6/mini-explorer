@@ -8,8 +8,8 @@ function grayImageMasked = BoxRemove1Click(tolerance, radius, grayImage)
     radius = 5;
  end
 
-tolerance = 0.50;
-radius = 5;
+%tolerance = 0.50;
+%radius = 5;
 
 % Load and read file 
 %fname = 'ct_preregPET.raw'; 

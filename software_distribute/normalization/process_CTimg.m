@@ -71,7 +71,7 @@ axis image
 
 disp('Check image, press any key to continue'); 
 pause
-disp('ok, continue'); 
+
 
 % new pre-process
 %xend = pixelsize*size(imgstore,1);
@@ -146,8 +146,8 @@ img_info.ct_dcminfo = ct_dcminfo;
 if zika_flag
 	box_remove_done = false;
 	while ~box_remove_done
-		close all
-    	imgstore2_nobox = BoxRemove1Click(0.5, 8, imgstore2); 
+		%close all
+    	imgstore2_nobox = BoxRemove1Click(0.25, 5, imgstore2); 
     	%imgstore22 = imgstore2; 
     	imgstore2 = imgstore2_nobox; 
     	
@@ -161,10 +161,11 @@ if zika_flag
 				disp('OK, proceeding with image registration...'); 				
     	
     	end
+    	close(1); close(2); close(3); close(4); close(5); close(6); close(7); 
     end
 end
-close all
 
+%close all
 
 
 fsave1 = [CTpath,'/ct_preregPET.raw'];

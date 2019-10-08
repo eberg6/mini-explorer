@@ -204,7 +204,7 @@ if zika_flag
 	title('Click on GE PET/CT bed'); 
 	colormap(gray);
 	[ctcol3,ctrow3] = ginput(1);
-	
+	%ctrow3
 	ctrow3 = ctrow3 + 35;
 	 
 
