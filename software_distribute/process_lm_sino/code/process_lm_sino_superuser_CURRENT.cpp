@@ -89,7 +89,7 @@ int main() {
 	bool scout_on = false; 
 
 	// Read config file
-	string scan_details_fullpath = "/run/media/meduser/data/software_distribute/process_lm_sino/Reconstruction_Parameters_1";
+	string scan_details_fullpath = "../process_lm_sino/Reconstruction_Parameters_1";
 	//string scan_details_fullpath = "c:/Documents/Software/miniEXPLORER/process_lm_sino/Reconstruction_Parameters_1.txt";
 
 	ifstream detes;
@@ -819,7 +819,7 @@ int main() {
 
 	// ************		Load LUTs  ****************//
 	
-	string LUT_dir = "/run/media/meduser/data/software_distribute/process_lm_sino/LUTs/";
+	string LUT_dir = "../process_lm_sino/LUTs/";
 
 	
 	string fname_LUT = "LUTs";

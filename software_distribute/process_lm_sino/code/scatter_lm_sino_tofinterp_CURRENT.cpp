@@ -64,7 +64,7 @@ int main() {
 
 
 	// open LUTs
-	string LUT_dir = "/run/media/meduser/data/software_distribute/process_lm_sino/LUTs/";
+	string LUT_dir = "../process_lm_sino/LUTs/";
 	
 	// read planes, offset look up tables
 	string planeoffset_fname = "planeoffset_LUT";
