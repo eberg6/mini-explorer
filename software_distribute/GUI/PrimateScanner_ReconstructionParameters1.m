@@ -155,7 +155,8 @@ guidata(hObject, handles);
 function norm_Callback(hObject, eventdata, handles)
 
 pathname_norm = uigetdir('../normalization_data/', 'Select Normalization Folder'); 
-pathname_norm_text = erase(pathname_norm,'/run/media/meduser/data/software_distribute/normalization_data/'); 
+pathname_norm_text = pathname_norm((end-9):end); 
+%pathname_norm_text = erase(pathname_norm,'/run/media/meduser/data/software_distribute/normalization_data/'); 
 % /run/media/meduser/data/software_distribute/reconstruction/normalization
 set(handles.norm_text, 'String', pathname_norm_text);
 handles.pathname_norm = pathname_norm;
@@ -424,12 +425,15 @@ switch a
             petimgpath = [petimgpath,'.os.20.it.1'];
             
             
-            fname_petscout = [petimgpath]; 
+            fname_petscout = [petimgpath]
+            
             
             if exist(fname_petscout,'file')>0.5
                 do_scout = 0; 
+            else 
+            	do_scout = 1; 
             end
-           
+            
             
             if do_scout == 1
                 
@@ -1077,6 +1081,11 @@ switch a
             end
         end
         
+        make_send_to_server_sh(handles.pathname_ct,pathname_ct11,server_name,1,[8]); 
+        pause(0.5); 
+        fname_process = 'sh ./send_to_server.sh'; 
+        system(fname_process)
+        pause(1);
         
         do_recon_it1 = 1; 
         if img_check >= (ef - sf + 0.5) 
@@ -1147,6 +1156,10 @@ switch a
             	fname_process = 'sh ./send_to_server.sh'; 
             	system(fname_process)
             	pause(1);
+            	
+            	
+            	
+            	
             end
             
         end
@@ -1320,7 +1333,7 @@ switch a
             	
         		
             	disp('Paused before reconstruction iteration 2.');  
-            	
+            
             	run_recon_server_it2(pathname_start44,server_name,petimgpath,sf,ef); 
             	pause(1)
             	pause

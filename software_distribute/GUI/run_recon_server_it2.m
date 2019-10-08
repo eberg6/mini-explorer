@@ -6,7 +6,7 @@ system(cmd_server);
 
 
 % need to change to screen
-%cmd_server = ['ssh -t eberg@',server_name,'  ',fdir_remote,'/run_sh/run_recon.sh; ']; 
+cmd_server = ['ssh -t eberg@',server_name,'  ',fdir_remote,'/run_sh/run_recon.sh; ']; 
 %system(cmd_server); 
 
 % send signal that recon is done

@@ -1,6 +1,10 @@
 function postprocess_img(fdir_bin,lmfname1,imgfname,ct_path,tf,norm_bin,os,it,frame)
 
 
+
+ss = ['Post-processing image frame ',num2str(frame), '... '];
+disp(ss);  
+
 % tf is 1 if it is calibration scan, 0 for normal scan
 
 norm_bin = [norm_bin,'/']; 
@@ -45,9 +49,9 @@ fclose(fid);
 
 str1 = A{305}; 
 str_find = 'injection_time'; 
-inj_time_str = str1((length(str_find)+5):end)
-inj_time = datetime(inj_time_str,'InputFormat','MMMddHH:mm:ssyyyy')
-inj_timevec = datevec(inj_time)
+inj_time_str = str1((length(str_find)+5):end);
+inj_time = datetime(inj_time_str,'InputFormat','MMMddHH:mm:ssyyyy');
+inj_timevec = datevec(inj_time);
 
 str2 = A{152}; 
 str_find = 'isotope_half_life'; 
@@ -345,8 +349,8 @@ end
 if length(a3) == 1
 	a3 = ['0',a3];
 end
-studydate = [a1,a2,a3]
-studytime = studydatetime(13:end) 
+studydate = [a1,a2,a3];
+studytime = studydatetime(13:end);
 studytime = studytime([1,2,4,5,7,8]); 
 
 injdatetime = datestr(inj_timevec); 

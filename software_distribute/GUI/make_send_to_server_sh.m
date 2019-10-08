@@ -66,8 +66,13 @@ if ~isempty(find(file_choice == 7))
 	fprintf(fid,str); 
 end
 
+
+if ~isempty(find(file_choice == 8))
+	str = ['scp -P 8300 eberg@',server_name,':',fdir_remote,'/attn_blocksino.raw  ',fdir_local,'\n\n']; 
+
 end
-%fprintf(fid,str); 
+end
+fprintf(fid,str); 
 
 str = ''; 
 
